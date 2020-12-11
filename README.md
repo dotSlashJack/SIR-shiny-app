@@ -10,6 +10,8 @@ This Shiny app presents a visual representation of a simple SIR model's dynamics
 
 ### The mathematical model
 
+The SIR model is based on the following set of differential equations:
+
 <img src="https://render.githubusercontent.com/render/math?math=\frac{dS}{dt} = -\frac{\beta*S*I}{N}">
 
 

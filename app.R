@@ -6,16 +6,36 @@ library(deSolve)
 library(shinyWidgets)
 library(ggthemes)
 
+# Define CSS used for slider colors
+slider_css <- "
+.irs-bar,
+.irs-bar-edge,
+.irs-single {
+    color: black;
+    background: #7cccd6;
+    border-color: #7cccd6;
+};,
+"
+slider_lab_css <- "
+.irs-grid-text {
+    color:  #7cccd6;
+    font-weight: bold;
+};
+"
+
 # Define UI elements
 ui <- fluidPage(
     
     titlePanel("SIR Simulator"), # app title
+    tags$p("Modeing disease spread over time", style="font-size: 16px;"),
     setBackgroundColor("#7cccd6"), # background color
+    tags$style(slider_css),
     
     # add sliders and their description
     sidebarLayout(
         sidebarPanel(
-            style="background-color: #eaf2f3;",
+            tags$style(slider_lab_css),
+            style="background-color: #eaf2f3; ",
             sliderInput("beta",
                         paste("\U03B2"),
                         min = 1,
@@ -23,7 +43,6 @@ ui <- fluidPage(
                         value = 50
             ),
             tags$em("Flow rate from susceptible to infected"),
-            #setSliderColor("#eaf2f3", 1),
             tags$br(), tags$br(),
             sliderInput("nu",
                         paste0("\U1D742"),
@@ -35,8 +54,8 @@ ui <- fluidPage(
             tags$br(),tags$br(),
             sliderInput("N",
                         "\U1D441",
-                        min = 1e5,
-                        max = 1e8,
+                        min = 1e4,
+                        max = 1e6,
                         value = 1e5
             ),
             tags$em("Total population size"),
@@ -52,27 +71,30 @@ ui <- fluidPage(
         
         # add plot, download, descriptive text
         mainPanel(
-                    plotOutput("plot"),
-                    tags$br(),
-                    #add button to download time series data
-                    downloadButton('downloadData', 'Download SIR Time Series', style="color: black; background-color: #eaf2f3;"),
-                    tags$br(), tags$br(),
-                    
-                    tags$p(
-                        style="background-color: #eaf2f3; padding: 20px;",
-                        "Please use the sliders on the panel to the left to provide the model with the desired parameters and it will automatically update. For more information on the parameters, click the link to the README below.
+            plotOutput("plot"),
+            tags$br(),
+            #add button to download time series data
+            downloadButton('downloadData', 'Download SIR Time Series', style="color: black; background-color: #eaf2f3;"),
+            tags$br(), tags$br(),
+            
+            tags$p(
+                style="background-color: #eaf2f3; padding: 20px;",
+                "Please use the sliders on the panel to the left to provide the model with the desired parameters and it will automatically update. For more information on the parameters, click the link to the README below.
                         Below the plot, you can also see the maximum number of infected individuals, as well as time step (day) at which there were the most infected individuals.
                         If you want to access the raw time series data for the SIR model with your specific inputs, you can download them as a csv by clicking the download button above.",
-                        tags$br(), tags$br(),
-                        tags$a(href="https://github.com/dotSlashJack/SIR-shiny-app", "README and Source Code", style="color: black; text-decoration-line: underline;")
-                    ),
-                  )
+                tags$br(), tags$br(),
+                tags$a(href="https://github.com/dotSlashJack/SIR-shiny-app", "README and Source Code", style="color: black; text-decoration-line: underline;")
+            )
+        )
     ),
+    tags$p(
+        "Created by Jack Hester, Emily Nomura, and Emma Dennis-Knieriem",
+        style="background-color: #eaf2f3; padding: 10px;"
+    )
 )
 
 # Define server logic
 server <- function(input, output) {
-    
     
     # build SIR model
     sir.model <- function(t, y, parms) {
@@ -134,9 +156,9 @@ server <- function(input, output) {
         # add info on this plot
         colors <- c("Susceptible" = "orange", "Infected" = "red", "Recovered" = "green")
         ggplot(data=result) +
-            geom_line(aes(x=time, y=S, color = "Susceptible"), size=1) +
-            geom_line(aes(x=time, y=I, color = "Infected"), size=1) +
-            geom_line(aes(x=time, y=R, color = "Recovered"), size=1) +
+            geom_line(aes(x=time*100, y=S, color = "Susceptible"), size=1) +
+            geom_line(aes(x=time*100, y=I, color = "Infected"), size=1) +
+            geom_line(aes(x=time*100, y=R, color = "Recovered"), size=1) +
             labs(x = "Time (Days)",
                  y = "Population",
                  color = "Legend") +
@@ -149,7 +171,7 @@ server <- function(input, output) {
                   legend.text = element_text(size=14),
                   legend.title = element_blank(),
                   plot.caption.position = "plot"
-                  ) +
+            ) +
             labs(caption = paste0("\nThe maximum number of individuals infected was ", round(max(result$I),0), ',\noccuring at day ', result$time[which.max(result$I)]*100 ))
         
     })
@@ -157,4 +179,3 @@ server <- function(input, output) {
 
 # Run the application
 shinyApp(ui = ui, server = server)
-
