@@ -12,7 +12,10 @@ This Shiny app generates a plot of an SIR model. The plot models susceptible (S)
 
 ### The mathematical model
 
-$$ \frac{dS}{dt} = -\frac{\beta*S*I}{N} $$
+<img src="https://render.githubusercontent.com/render/math?math=\frac{dS}{dt} = -\frac{\beta*S*I}{N}">
+
+
+$$  $$
 
 $$ \frac{\beta*S*I}{N} - \nu*I $$
 
