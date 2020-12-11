@@ -6,14 +6,16 @@ library(deSolve)
 library(shinyWidgets)
 library(ggthemes)
 
+# Define UI elements
 ui <- fluidPage(
     
     titlePanel("SIR Simulator"), # app title
     setBackgroundColor("#7cccd6"), # background color
     
-    # side bar (sliders)
+    # add sliders and their description
     sidebarLayout(
         sidebarPanel(
+            style="background-color: #eaf2f3;",
             sliderInput("beta",
                         paste("\U03B2"),
                         min = 1,
@@ -32,7 +34,7 @@ ui <- fluidPage(
             tags$em("Flow rate from infected to recovered"),
             tags$br(),tags$br(),
             sliderInput("N",
-                        "N",
+                        "\U1D441",
                         min = 1e5,
                         max = 1e8,
                         value = 1e5
@@ -48,14 +50,22 @@ ui <- fluidPage(
             tags$em("The number infected at the beginning (t=0)")
         ),
         
-        # Show a plot of the generated distribution
+        # add plot, download, descriptive text
         mainPanel(
                     plotOutput("plot"),
                     tags$br(),
                     #add button to download time series data
-                    downloadButton('downloadData', 'Download SIR Time Series'),
-                    tags$br(),
-                    tags$a(href="https://github.com/dotSlashJack//README.md", "Click here!")
+                    downloadButton('downloadData', 'Download SIR Time Series', style="color: black; background-color: #eaf2f3;"),
+                    tags$br(), tags$br(),
+                    
+                    tags$p(
+                        style="background-color: #eaf2f3; padding: 20px;",
+                        "Please use the sliders on the panel to the left to provide the model with the desired parameters and it will automatically update. For more information on the parameters, click the link to the README below.
+                        Below the plot, you can also see the maximum number of infected individuals, as well as time step (day) at which there were the most infected individuals.
+                        If you want to access the raw time series data for the SIR model with your specific inputs, you can download them as a csv by clicking the download button above.",
+                        tags$br(), tags$br(),
+                        tags$a(href="https://github.com/dotSlashJack/SIR-shiny-app", "README and Source Code", style="color: black; text-decoration-line: underline;")
+                    ),
                   )
     ),
 )
@@ -69,9 +79,9 @@ server <- function(input, output) {
         #'sir model
         #'param t the time points
         #'param y the initial conditions of the SIR model (initial S,I, and R numbers)
-        #'param parms a list containing
+        #'param parms a list of parameters containing beta, nu, and N of the model (see comments in function)
+        #'
         #'return dy, a list containing the number of susceptible, infected, and recovered at each time point
-        #
         with(as.list(c(y,parms)),{
             #S = # number of susceptibles
             #I = # number of infecteds
@@ -88,24 +98,26 @@ server <- function(input, output) {
         })
     }
     
-    
+    # add functions to support the download button
     output$plot <- renderPlot({
         
         output$downloadData <- downloadHandler(
-            filename = function() {
+            filename <- function() {
                 paste('SIR-data', Sys.Date(), '.csv', sep='')
             },
-            content = function(con) {
-                data <- data.frame(day=time.points*100,group=c("Susceptible","Infected","Recovered"), value=c(result$S,result$I,result$R))
+            
+            # download the SIR data at each time step as a CSV
+            # con is the save location (user specified in UI popup)
+            content <- function(con) {
+                data <- data.frame(day=time.points*100, susceptible=result$S, infected=result$I, recovered=result$R)
                 write.csv(data, con)
             }
         )
         
         parameters=list(
-            alpha = input$alpha,
             beta = input$beta,
             nu = input$nu,
-            N <- input$N
+            N = input$N
         )
         
         #N <- 1e5 #pop size
@@ -133,10 +145,12 @@ server <- function(input, output) {
             theme_stata() +
             theme(plot.caption = element_text(size=14),
                   axis.title = element_text(size=14),
-                  title = element_text(size=15)
-                   
+                  title = element_text(size=15),
+                  legend.text = element_text(size=14),
+                  legend.title = element_blank(),
+                  plot.caption.position = "plot"
                   ) +
-            labs(caption = paste0("The maximum number of individuals infected was ", round(max(result$I),0), ',\n occuring at day ', result$time[which.max(result$I)]*100 ))
+            labs(caption = paste0("\nThe maximum number of individuals infected was ", round(max(result$I),0), ',\noccuring at day ', result$time[which.max(result$I)]*100 ))
         
     })
 }
