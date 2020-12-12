@@ -8,7 +8,7 @@
 
 This Shiny app presents a visual representation of a simple SIR model's dynamics over time. The plot models susceptible (S), infected (I), and recovered (R) populations over time. The input parameters, &beta;, &nu;, &#119873;, and initial # infectious, can be changed by the user with sliders. Our model assumes homogeneous, random mixing and does not take births, deaths, pre-infectious and latent periods, or any other demographics into account. More information on SIR models can be found <a href="https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model">here</a>.
 
-### The mathematical model
+#### The mathematical model
 
 The SIR model is based on the following set of differential equations:
 
@@ -21,6 +21,10 @@ The SIR model is based on the following set of differential equations:
 <img src="https://render.githubusercontent.com/render/math?math=\frac{dR}{dt} = \nu*I">
 
 Our model treats one day as a single time step.
+
+## Usage
+
+To use this app, you can visit <a href="https://jack-hester.shinyapps.io/sir-shiny-app/">https://jack-hester.shinyapps.io/sir-shiny-app/</a>. You can also run it locally and modify the code by downloading and running app.r.
 
 ## User Inputs
 
